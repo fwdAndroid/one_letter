@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:one_letter/auth/signup.dart';
+import 'package:one_letter/database/auth_data.dart';
 import 'package:one_letter/widgets/mobilelayout.dart';
 import 'package:one_letter/widgets/textfield.dart';
+import 'package:one_letter/widgets/utils.dart';
 
 class Login_Screen extends StatefulWidget {
   const Login_Screen({Key? key}) : super(key: key);
@@ -11,11 +13,11 @@ class Login_Screen extends StatefulWidget {
 }
 
 class _Login_ScreenState extends State<Login_Screen> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passController = TextEditingController();
+  bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passController = TextEditingController();
-    bool _isLoading = false;
     @override
     void dispose() {
       // TODO: implement dispose
@@ -83,14 +85,15 @@ class _Login_ScreenState extends State<Login_Screen> {
             Align(
               alignment: Alignment.center,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (builder) => MobileScreenLayout()));
-                },
-                child: Text(
-                  "Login",
-                  style: TextStyle(color: Colors.white),
-                ),
+                onPressed: loginUser,
+                child: _isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Text(
+                        "Login",
+                        style: TextStyle(color: Colors.white),
+                      ),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xff8BC83F),
                     fixedSize: Size(268, 40)),
@@ -114,5 +117,26 @@ class _Login_ScreenState extends State<Login_Screen> {
         ),
       ),
     );
+  }
+
+  void loginUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+    String rse = await AuthMethods().loginUpUser(
+      email: emailController.text,
+      pass: passController.text,
+    );
+
+    print(rse);
+    setState(() {
+      _isLoading = false;
+    });
+    if (rse == 'sucess') {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (builder) => MobileScreenLayout()));
+    } else {
+      showSnakBar(rse, context);
+    }
   }
 }
